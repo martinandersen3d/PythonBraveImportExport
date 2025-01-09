@@ -1,25 +1,29 @@
 import json
 import os
+import platform
 
-# Define the path to Brave's Preferences file (Windows example)
-BRAVE_PREF_PATH = os.path.expanduser("~\\AppData\\Local\\BraveSoftware\\Brave-Browser\\User Data\\Default\\Preferences")
+# Determine the Brave Preferences file path based on the operating system
+def get_brave_pref_path():
+    if platform.system() == "Windows":
+        return os.path.expanduser(r"~\AppData\Local\BraveSoftware\Brave-Browser\User Data\Default\Preferences")
+    else:
+        return os.path.expanduser("~/.config/BraveSoftware/Brave-Browser/Default/Preferences")
 
-# Function to extract hotkeys
-def extract_brave_hotkeys():
+# Function to extract and export hotkeys to a JSON file
+def extract_and_export_brave_hotkeys():
     try:
-        with open(BRAVE_PREF_PATH, 'r', encoding='utf-8') as file:
+        brave_pref_path = get_brave_pref_path()
+        with open(brave_pref_path, 'r', encoding='utf-8') as file:
             preferences = json.load(file)
 
         hotkeys = preferences.get('extensions', {}).get('commands', {})
-        if not hotkeys:
-            print("No hotkeys found!")
-            return
+        accelerators = preferences.get('brave', {}).get('accelerators', {})
 
-        print("Brave Browser Hotkeys:")
-        for command, details in hotkeys.items():
-            for detail in details:
-                key_combination = detail.get('shortcut', 'Not Set')
-                print(f"{command}: {key_combination}")
+        osname = platform.system().lower()
+        export_path = f"brave_hotkeys_export_{osname}.json"
+        with open(export_path, 'w', encoding='utf-8') as file:
+            json.dump({"commands": hotkeys, "accelerators": accelerators}, file, indent=4)
+        print(f"Hotkeys and accelerators exported to {export_path}")
 
     except FileNotFoundError:
         print("Preferences file not found. Ensure Brave Browser is installed.")
@@ -28,6 +32,29 @@ def extract_brave_hotkeys():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Run the hotkey extraction
+# Function to import hotkeys and accelerators from a JSON file
+def import_hotkeys_and_accelerators_from_file():
+    osname = platform.system().lower()
+    import_path = f"brave_hotkeys_import_{osname}.json"
+    try:
+        brave_pref_path = get_brave_pref_path()
+        with open(import_path, 'r', encoding='utf-8') as file:
+            imported_data = json.load(file)
+
+        with open(brave_pref_path, 'r+', encoding='utf-8') as file:
+            preferences = json.load(file)
+            preferences['extensions']['commands'] = imported_data.get('commands', {})
+            preferences['brave']['accelerators'] = imported_data.get('accelerators', {})
+            file.seek(0)
+            json.dump(preferences, file, indent=4)
+            file.truncate()
+        print(f"Hotkeys and accelerators imported from {import_path}")
+    except Exception as e:
+        print(f"An error occurred while importing hotkeys and accelerators: {e}")
+
+# Example usage
 if __name__ == "__main__":
-    extract_brave_hotkeys()
+    # Export hotkeys and accelerators
+    extract_and_export_brave_hotkeys()
+    # Import hotkeys and accelerators
+    # import_hotkeys_and_accelerators_from_file()
