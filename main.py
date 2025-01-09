@@ -5,7 +5,7 @@ import platform
 # Determine the Brave Preferences file path based on the operating system
 def get_brave_pref_path():
     if platform.system() == "Windows":
-        return os.path.expanduser(r"~\AppData\Local\BraveSoftware\Brave-Browser\User Data\Default\Preferences")
+        return os.path.expanduser(r"~\AppData\Local\BraveSoftware\Brave-Browser\User Data\Profile 1\Preferences")
     else:
         return os.path.expanduser("~/.config/BraveSoftware/Brave-Browser/Default/Preferences")
 
@@ -55,6 +55,6 @@ def import_hotkeys_and_accelerators_from_file():
 # Example usage
 if __name__ == "__main__":
     # Export hotkeys and accelerators
-    extract_and_export_brave_hotkeys()
+    # extract_and_export_brave_hotkeys()
     # Import hotkeys and accelerators
-    # import_hotkeys_and_accelerators_from_file()
+    import_hotkeys_and_accelerators_from_file()
